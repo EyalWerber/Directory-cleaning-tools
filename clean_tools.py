@@ -13,13 +13,10 @@ class File():
         self.name = name
         self.path = path+'\\'
         self.full_path = self.path+self.name
-
         # If True its a directory, else, it is a file
         self.is_dir = os.path.isdir(
             self.full_path)
-
-        self.format = 'dir' if self.is_dir else ''.join(
-            self.name.split('.')[1:])
+        self.extension = os.path.splitext(self.full_path)[1]
 
     def __str__(self):
         return self.name
@@ -28,8 +25,8 @@ class File():
     def __repr__(self):
         return self.__str__()
 
-    def get_file_creation_year(file_path):
-        return str(datetime.datetime.fromtimestamp(os.path.getctime(file_path)).date()).split('-')[0]
+    def get_file_creation_year(self):
+        return str(datetime.datetime.fromtimestamp(os.path.getctime(self.full_path)).date()).split('-')[0]
 
     def change_name(self, new_name):
         os.rename(self.full_path, self.path+new_name)
@@ -40,23 +37,26 @@ class File():
     def move_file_to_path(self, path): #move File to certain path
         os.replace(self.full_path,path+'\\'+self.name)
 
-    def move_file_by_format(self): #move file to a directory named as its format
+    def move_file_by_extention(self): #move file to a directory named as its format
+        extension = self.extension
         if not self.is_dir:
             try:
-                os.mkdir(self.path+self.format)
+                os.mkdir(self.path+self.extension)
             except FileExistsError:
-                print(f'{self.format} Directory exists!')
+                print(f'{self.extension} Directory exists!')
             os.replace(self.full_path, self.path +
-                       self.format+'\\'+self.name)
+                       self.extension+'\\'+self.name)
     
     def move_file_by_year(self):
+        year= self.get_file_creation_year()
         if not self.is_dir:
+            
             try:
-                os.mkdir(self.path+self.get_file_creation_year(self.full_path))
+                os.mkdir(self.path+year)
             except FileExistsError:
-                print(f'{self.format} Directory exists!')
+                print(f'{year} Directory exists!')
             os.replace(self.full_path, self.path +
-                       self.get_file_creation_year(self.full_path)+'\\'+self.name)
+                       year+'\\'+self.name)
 
     def move_by_year(self):
         pass
@@ -68,7 +68,7 @@ class DirPointer():
         # Get a list of file objects
         self.file_list = self.set_file_objects()
         # self.file_list = os.listdir(dir_path)
-        self.all_file_list = []  # To be initialised by recurse_branching_dirs methode
+       
 
     def get_dirs_only(self):
         return list(filter(lambda file: file.is_dir, self.file_list))
@@ -117,11 +117,16 @@ class DirPointer():
         return [item for sublist in files if sublist != None for item in sublist]
         
 
+def main():
+    cwd = os.getcwd()
+    # pointer = DirPointer(cwd)
 
-cwd =os.getcwd()
-pointer = DirPointer(cwd)
 
+    # branching_files = pointer.file_list
 
-branching_files = pointer.get_all_branching_files()
-for file in branching_files:
-    file.move_file_to_path(cwd)
+    # print(branching_files)
+    # for file in branching_files:
+    #     file.move_file_by_extention()
+
+if __name__ == '__main__':
+    main()
